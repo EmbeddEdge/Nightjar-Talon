@@ -1,0 +1,432 @@
+
+{
+    "Devices": {
+      "DefaultProperties": {
+        "DeviceType": "DefaultProperties",
+        "PropertyMaps": {
+          "Temperature": {
+            "SubscribeTopic": "Grandcentrix/{id}/environment",
+            "SubscribeFormat": "Json",
+            "SubscribePath": "temperature",
+            "PublishTopic": "Grandcentrix/{id}/setenvironment",
+            "PublishFormat": "Json",
+            "PublishPath": "temperature",
+            "DataType": "double"
+          },
+          "Heater": {
+            "SubscribeTopic": "Grandcentrix/Device1Sub/heaterstate",
+            "PublishTopic": "Grandcentrix/{id}/heatercommand",
+            "DataType": "bool"
+          },
+          "Light": {
+            "SubscribeTopic": "Grandcentrix/{id}/light",
+            "SubscribeFormat": "Xml",
+            "SubscribePath": "Light/State",
+            "PublishTopic": "Grandcentrix/{id}/light",
+            "PublishFormat": "Xml",
+            "PublishPath": "Light/Command",
+            "DataType": "bool"
+          }
+        }
+      },
+      "fvziotedgeProperties": {
+        "DeviceType": "DefaultProperties",
+        "PropertyMaps": {
+          "Temperature": {
+            "SubscribeTopic": "rac_mothership/fvziotaeroponics/{id}/environment",
+            "SubscribeFormat": "Json",
+            "SubscribePath": "temphum.temperature",
+            "PublishTopic": "rac_mothership/fvziotaeroponics/{id}/setenvironment",
+            "PublishFormat": "Json",
+            "PublishPath": "temphum.temperature",
+            "DataType": "double"
+          },
+          "Humidity": {
+            "SubscribeTopic": "rac_mothership/fvziotaeroponics/{id}/environment",
+            "SubscribeFormat": "Json",
+            "SubscribePath": "temphum.humidity",
+            "PublishTopic": "rac_mothership/fvziotaeroponics/{id}/setenvironment",
+            "PublishFormat": "Json",
+            "PublishPath": "temphum.humidity",
+            "DataType": "double"
+          },
+          "Moisture": {
+            "SubscribeTopic": "rac_mothership/fvziotaeroponics/{id}/environment",
+            "SubscribeFormat": "Json",
+            "SubscribePath": "soil.moisture",
+            "PublishTopic": "rac_mothership/fvziotaeroponics/{id}/setenvironment",
+            "PublishFormat": "Json",
+            "PublishPath": "soil.moisture",
+            "DataType": "double"
+          },
+          "Timestamp": {
+            "SubscribeTopic": "rac_mothership/fvziotaeroponics/{id}/environment",
+            "SubscribeFormat": "Json",
+            "SubscribePath": "timestamp",
+            "PublishTopic": "rac_mothership/fvziotaeroponics/{id}/setenvironment",
+            "PublishFormat": "Json",
+            "PublishPath": "timestamp",
+            "DataType": "string"
+          }
+        }
+      },
+      "nightjarProperties": {
+        "DeviceType": "DefaultProperties",
+        "PropertyMaps": {
+          "Temperature": {
+            "SubscribeTopic": "rac_mothership/nightjar/{id}/environment",
+            "SubscribeFormat": "Json",
+            "SubscribePath": "env.temperature",
+            "PublishTopic": "rac_mothership/nightjar/{id}/setenvironment",
+            "PublishFormat": "Json",
+            "PublishPath": "env.temperature",
+            "DataType": "double"
+          },
+          "Humidity": {
+            "SubscribeTopic": "rac_mothership/nightjar/{id}/environment",
+            "SubscribeFormat": "Json",
+            "SubscribePath": "env.humidity",
+            "PublishTopic": "rac_mothership/nightjar/{id}/setenvironment",
+            "PublishFormat": "Json",
+            "PublishPath": "env.humidity",
+            "DataType": "double"
+          },
+          "MagSwitch": {
+            "SubscribeTopic": "rac_mothership/nightjar/{id}/environment",
+            "SubscribeFormat": "Json",
+            "SubscribePath": "door.switch",
+            "PublishTopic": "rac_mothership/nightjar/{id}/setenvironment",
+            "PublishFormat": "Json",
+            "PublishPath": "door.switch",
+            "DataType": "Boolean"
+          },
+          "Timestamp": {
+            "SubscribeTopic": "rac_mothership/nightjar/{id}/environment",
+            "SubscribeFormat": "Json",
+            "SubscribePath": "timestamp",
+            "PublishTopic": "rac_mothership/nightjar/{id}/setenvironment",
+            "PublishFormat": "Json",
+            "PublishPath": "timestamp",
+            "DataType": "string"
+          }
+        }
+      },
+      "OldDefaultProperties": {
+        "DeviceType": "DefaultProperties",
+        "PropertyMaps": {
+          "deviceID": {
+            "SubscribeTopic": "vodafone/telemetry/{id}",
+            "SubscribeFormat": "Json",
+            "SubscribePath": "deviceID",
+            "PublishTopic": "vodafone/telemetry/{id}",
+            "PublishFormat": "Json",
+            "PublishPath": "deviceID",
+            "DataType": "string",
+            "DeviceIdProperty": true
+          },
+          "timeStamp": {
+            "SubscribeTopic": "vodafone/telemetry/{id}",
+            "SubscribeFormat": "Json",
+            "SubscribePath": "timeStamp",
+            "PublishTopic": "vodafone/telemetry/{id}",
+            "PublishFormat": "Json",
+            "PublishPath": "timeStamp",
+            "DataType": "DateTime",
+            "DeviceIdProperty": true
+          },
+          "valueStr": {
+            "SubscribeTopic": "vodafone/telemetry/{id}",
+            "SubscribeFormat": "Json",
+            "SubscribePath": "valueStr",
+            "PublishTopic": "vodafone/telemetry/{id}",
+            "PublishFormat": "Json",
+            "PublishPath": "valueStr",
+            "DataType": "string",
+            "DeviceIdProperty": false,
+            "ChildProperties": {
+              "TerminalHeartbeat": {
+                "SubscribeTopic": "TerminalHeartbeat",
+                "DataType": "Boolean"
+              },
+              "TerminalID": {
+                "SubscribeTopic": "TerminalID",
+                "DataType": "string"
+              },
+              "DeviceID": {
+                "SubscribeTopic": "DeviceID",
+                "DataType": "string"
+              },
+              "VehicleID": {
+                "SubscribeTopic": "VehicleID",
+                "DataType": "string"
+              },
+              "TerminalType": {
+                "SubscribeTopic": "TerminalType",
+                "DataType": "string"
+              },
+              "TermManufactureID": {
+                "SubscribeTopic": "TermManufactureID",
+                "DataType": "ushort"
+              },
+              "LicensePlateColor": {
+                "SubscribeTopic": "LicensePlateColor",
+                "DataType": "Byte"
+              },
+              "CityCountryID": {
+                "SubscribeTopic": "CityCountryID",
+                "DataType": "string"
+              },
+              "ProvincialID": {
+                "SubscribeTopic": "ProvincialID",
+                "DataType": "string"
+              },
+              "SoftwareVersion": {
+                "SubscribeTopic": "SoftwareVersion",
+                "DataType": "string"
+              },
+              "CompileDate": {
+                "SubscribeTopic": "CompileDate",
+                "DataType": "string"
+              },
+              "CpuId": {
+                "SubscribeTopic": "CpuId",
+                "DataType": "string"
+              },
+              "GsmModel": {
+                "SubscribeTopic": "GsmModel",
+                "DataType": "string"
+              },
+              "GsmImei": {
+                "SubscribeTopic": "GsmImei",
+                "DataType": "string"
+              },
+              "SimImsi": {
+                "SubscribeTopic": "SimImsi",
+                "DataType": "string"
+              },
+              "SimIccid": {
+                "SubscribeTopic": "SimIccid",
+                "DataType": "string"
+              },
+              "CarModelId": {
+                "SubscribeTopic": "CarModelId",
+                "DataType": "string"
+              },
+              "CarVIN": {
+                "SubscribeTopic": "CarVIN",
+                "DataType": "string"
+              },
+              "TotalMilage": {
+                "SubscribeTopic": "TotalMilage",
+                "DataType": "uint"
+              },
+              "TotalFuelConsumption": {
+                "SubscribeTopic": "TotalFuelConsumption",
+                "DataType": "uint"
+              },
+              "Displacement": {
+                "SubscribeTopic": "Displacement",
+                "DataType": "ushort"
+              },
+              "OilDensity": {
+                "SubscribeTopic": "OilDensity",
+                "DataType": "ushort"
+              },
+              "OBDProtocol": {
+                "SubscribeTopic": "OBDProtocol",
+                "DataType": "ushort"
+              },
+              "FuelConsumptionCalcMethod": {
+                "SubscribeTopic": "FuelConsumptionCalcMethod",
+                "DataType": "byte"
+              },
+              "WarningFlagsRaw": {
+                "SubscribeTopic": "WarningFlagsRaw",
+                "DataType": "string"
+              },
+              "StatusBitsRaw": {
+                "SubscribeTopic": "StatusBitsRaw",
+                "DataType": "string"
+              },
+              "Vehicle_OverspeedAlarm": {
+                "SubscribeTopic": "Vehicle_OverspeedAlarm",
+                "DataType": "Boolean"
+              },
+              "Vehicle_FatigueDrivingAlarm": {
+                "SubscribeTopic": "Vehicle_FatigueDrivingAlarm",
+                "DataType": "Boolean"
+              },
+              "Vehicle_DangerAlarm": {
+                "SubscribeTopic": "Vehicle_DangerAlarm",
+                "DataType": "Boolean"
+              },
+              "Vehicle_GpsMalfunctionAlarm": {
+                "SubscribeTopic": "Vehicle_GpsMalfunctionAlarm",
+                "DataType": "Boolean"
+              },
+              "Vehicle_GpsAntennaConnAlarm": {
+                "SubscribeTopic": "Vehicle_GpsAntennaConnAlarm",
+                "DataType": "Boolean"
+              },
+              "Vehicle_GpsAntennaShortCiruitAlarm": {
+                "SubscribeTopic": "Vehicle_GpsAntennaShortCiruitAlarm",
+                "DataType": "Boolean"
+              },
+              "Vehicle_TerminalUnderVoltageAlarm": {
+                "SubscribeTopic": "Vehicle_TerminalUnderVoltageAlarm",
+                "DataType": "Boolean"
+              },
+              "Vehicle_Accelerating": {
+                "SubscribeTopic": "Vehicle_Accelerating",
+                "DataType": "Boolean"
+              },
+              "Gps_Locked": {
+                "SubscribeTopic": "Gps_Locked",
+                "DataType": "Boolean"
+              },
+              "Status_Operational": {
+                "SubscribeTopic": "Status_Operational",
+                "DataType": "Boolean"
+              },
+              "Gps_PositionEncrypted": {
+                "SubscribeTopic": "Gps_PositionEncrypted",
+                "DataType": "Boolean"
+              },
+              "Vehicle_FuelLevel": {
+                "SubscribeTopic": "Vehicle_FuelLevel",
+                "DataType": "String"
+              },
+              "Vehicle_OilConnected": {
+                "SubscribeTopic": "Vehicle_OilConnected",
+                "DataType": "Boolean"
+              },
+              "Vehicle_CircuitConnected": {
+                "SubscribeTopic": "Vehicle_CircuitConnected",
+                "DataType": "Boolean"
+              },
+              "Vehicle_DoorLocked": {
+                "SubscribeTopic": "Vehicle_DoorLocked",
+                "DataType": "Boolean"
+              },
+              "Gps_GPSConstellationUsed": {
+                "SubscribeTopic": "Gps_GPSConstellationUsed",
+                "DataType": "Boolean"
+              },
+              "Gps_BeidouConstellationUsed": {
+                "SubscribeTopic": "Gps_BeidouConstellationUsed",
+                "DataType": "Boolean"
+              },
+              "Gps_GlonassConstellationUsed": {
+                "SubscribeTopic": "Gps_GlonassConstellationUsed",
+                "DataType": "Boolean"
+              },
+              "Gps_GalileoConstellationUsed": {
+                "SubscribeTopic": "Gps_GalileoConstellationUsed",
+                "DataType": "Boolean"
+              },
+              "Gps_Latitude": {
+                "SubscribeTopic": "Gps_Latitude",
+                "DataType": "double"
+              },
+              "Gps_Longitude": {
+                "SubscribeTopic": "Gps_Longitude",
+                "DataType": "double"
+              },
+              "Gps_Altitude_ASL": {
+                "SubscribeTopic": "Gps_Altitude_ASL",
+                "DataType": "ushort"
+              },
+              "Gps_Speed_Kmh": {
+                "SubscribeTopic": "Gps_Speed_Kmh",
+                "DataType": "float"
+              },
+              "Gps_Direction_deg": {
+                "SubscribeTopic": "Gps_Direction_deg",
+                "DataType": "ushort"
+              }
+            }
+          }
+        }
+      },
+      "SharedBroker": {
+        "deviceName": "SharedBroker",
+        "deviceType": "TcpBroker",
+        "enabled": true,
+        "debug": true,
+        "propertiesDeviceName": null,
+        "make": null,
+        "model": null,
+        "host": "iotnxt-mqttbroker.iotnxt.io",
+        "port": "8883",
+        "useTls": true,
+        "validateCertificate": true,
+        "username": "vraptor",
+        "password": "lbTjfOHZVeDJo"
+      },
+      "OldBroker": {
+        "DeviceType": "TcpBroker",
+        "Host": "t000000002-vraptor.iotnxt.io",
+        "Port": 8883,
+        "UseTls": true,
+        "ValidateCertificate": false,
+        "UserName": "vraptor",
+        "Password": "lbTjfOHZVeDJo",
+        "Debug": true
+      },
+      "Device1": {
+        "Enabled": true,
+        "GatewayId": "mqtt-grandcentrix",
+        "GroupName": "Mqtt",
+        "DeviceType": "MqttTcp",
+        "Debug": true,
+        "BrokerDeviceName": "SharedBroker",
+        "PropertiesDeviceName": "DefaultProperties",
+        "SubscribeId": "Device1Sub",
+        "PublishId": "Device1Pub"
+      },
+      "fvzedgePi01": {
+        "Enabled": true,
+        "GatewayId": "mqtt-fvziotaeroponics",
+        "GroupName": "Mqtt",
+        "DeviceType": "MqttTcp",
+        "Debug": true,
+        "BrokerDeviceName": "SharedBroker",
+        "PropertiesDeviceName": "fvziotedgeProperties",
+        "SubscribeId": "fvzedgePi01",
+        "PublishId": "fvzedgePi01Pub"
+      },
+      "Nightjar": {
+        "Enabled": true,
+        "GatewayId": "mqtt-nightjar",
+        "GroupName": "Mqtt",
+        "DeviceType": "MqttTcp",
+        "Debug": true,
+        "BrokerDeviceName": "SharedBroker",
+        "PropertiesDeviceName": "nightjarProperties",
+        "SubscribeId": "nightjarSub",
+        "PublishId": "nightjarPub"
+      },
+      "012202300001": {
+        "Enabled": true,
+        "GroupName": "Vodafone",
+        "DeviceType": "MqttTcp",
+        "Debug": true,
+        "BrokerDeviceName": "OldBroker",
+        "PropertiesDeviceName": "OldDefaultProperties",
+        "SubscribeId": "012202300001",
+        "PublishId": "012202300001",
+        "ProtocolVersion": 2
+      },
+      "012201801976": {
+        "Enabled": true,
+        "GroupName": "Vodafone",
+        "DeviceType": "MqttTcp",
+        "Debug": true,
+        "BrokerDeviceName": "OldBroker",
+        "PropertiesDeviceName": "OldDefaultProperties",
+        "SubscribeId": "012201801976",
+        "PublishId": "012201801976",
+        "ProtocolVersion": 2
+      }
+    }
+  }
