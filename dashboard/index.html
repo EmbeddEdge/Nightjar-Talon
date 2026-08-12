@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Nightjar Talon | Room Lighting Survey</title>
+  
+  <!-- Modern Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Style Sheet -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Chart.js CDN for real-time plot -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <div class="logo-icon">☀️</div>
+        <div>
+          <h1>NIGHTJAR TALON</h1>
+          <p class="subtitle">Arduino Lux Survey Platform</p>
+        </div>
+      </div>
+      <div id="conn-badge" class="status-badge disconnected">Disconnected</div>
+    </header>
+
+    <!-- Main Content Flow -->
+    <main class="dashboard-grid">
+      
+      <!-- Card 1: Connection Panel -->
+      <section class="card connection-panel">
+        <h2 class="card-title">Device Connection</h2>
+        <p class="card-desc">Connect your phone to the Arduino Nano 33 BLE Sense wirelessly via Bluetooth.</p>
+        <div class="button-group">
+          <button id="btn-connect" class="btn btn-primary">Connect Sensor</button>
+          <button id="btn-disconnect" class="btn btn-danger hidden">Disconnect</button>
+        </div>
+        <div id="connection-meta" class="meta-info hidden">
+          <div class="meta-row">
+            <span>Signal Strength (RSSI):</span>
+            <span id="val-rssi">--</span>
+          </div>
+          <div class="meta-row">
+            <span>Dynamic Gain:</span>
+            <span id="val-gain">--</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 2: Real-time Monitor -->
+      <section class="card monitor-panel">
+        <h2 class="card-title">Real-Time Illuminance</h2>
+        
+        <!-- Large SVG Lux Gauge -->
+        <div class="gauge-container">
+          <svg class="lux-gauge" viewBox="0 0 200 120">
+            <!-- Gauge track background -->
+            <path class="gauge-track" d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke-width="12"></path>
+            <!-- Gauge fill -->
+            <path id="gauge-fill" class="gauge-fill" d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke-width="12" stroke-dasharray="251.2" stroke-dashoffset="251.2"></path>
+            <!-- Lux Value Display -->
+            <text id="txt-lux" x="100" y="90" class="gauge-text-val">0.0</text>
+            <text x="100" y="110" class="gauge-text-unit">LUX</text>
+          </svg>
+        </div>
+
+        <div class="cct-info">
+          <span>Light Color Temp:</span>
+          <span id="val-cct" class="highlight">-- K</span>
+        </div>
+
+        <!-- Real-Time Scrolling Chart -->
+        <div class="chart-container">
+          <canvas id="luxChart"></canvas>
+        </div>
+      </section>
+
+      <!-- Card 3: Room Illumination Survey Config -->
+      <section class="card survey-config-panel">
+        <h2 class="card-title">Survey Setup</h2>
+        <p class="card-desc">Define the room type and layout area to calibrate recommended lighting thresholds.</p>
+        
+        <div class="form-group">
+          <label for="room-select">Select Room Type</label>
+          <select id="room-select" class="form-input">
+            <option value="office">Office / Work Desk (500 Lux)</option>
+            <option value="kitchen">Kitchen Counter (350 Lux)</option>
+            <option value="living">Living / Family Room (150 Lux)</option>
+            <option value="bedroom">Bedroom (120 Lux)</option>
+            <option value="dining">Dining Room (150 Lux)</option>
+            <option value="bathroom">Bathroom (200 Lux)</option>
+            <option value="hallway">Hallway / Corridor (80 Lux)</option>
+            <option value="workshop">Workshop / Garage (300 Lux)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="room-area">Room Area (sq meters)</label>
+          <input type="number" id="room-area" class="form-input" value="12" min="1" step="0.5">
+        </div>
+
+        <div class="button-group">
+          <button id="btn-start-survey" class="btn btn-success">Start New Survey</button>
+          <button id="btn-reset-survey" class="btn btn-outline hidden">Reset Survey</button>
+        </div>
+      </section>
+
+      <!-- Card 4: Survey Measurement Logger -->
+      <section id="logger-panel" class="card logger-panel hidden">
+        <h2 class="card-title">Survey Logger</h2>
+        <p class="card-desc">Stand at a location, name the spot, and record the light level.</p>
+
+        <div class="log-controls">
+          <input type="text" id="point-label" class="form-input" placeholder="e.g. Desk, Window, Corner 1">
+          <button id="btn-add-point" class="btn btn-primary">Record Point</button>
+        </div>
+
+        <div class="table-container">
+          <table class="points-table">
+            <thead>
+              <tr>
+                <th>Location</th>
+                <th>Measured</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="points-list">
+              <!-- Dynamically populated rows -->
+              <tr id="empty-table-row">
+                <td colspan="4" class="text-center text-muted">No measurements recorded yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Card 5: Analytical Recommendations Report -->
+      <section id="report-panel" class="card report-panel hidden">
+        <h2 class="card-title">Analysis &amp; Recommendations</h2>
+        
+        <!-- Summary Badges -->
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="stat-label">Average</span>
+            <span id="stat-avg" class="stat-value">0.0 Lux</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Uniformity</span>
+            <span id="stat-unif" class="stat-value">0.00</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Overall Status</span>
+            <span id="stat-compliance" class="stat-badge badge-red">FAILED</span>
+          </div>
+        </div>
+
+        <!-- Details -->
+        <div class="report-details">
+          <h3>Uniformity Analysis</h3>
+          <p id="unif-feedback">Uniformity measures how evenly light is spread. Target is &ge; 0.40.</p>
+          
+          <h3>Lumen Assessment</h3>
+          <p id="lumen-feedback">--</p>
+          
+          <h3 id="dark-spot-title" class="hidden">Specific Dark Spots Remediation</h3>
+          <ul id="dark-spots-list" class="remedies-list">
+            <!-- Dynamic remedies go here -->
+          </ul>
+        </div>
+
+        <div class="button-group report-actions">
+          <button id="btn-export-csv" class="btn btn-outline">Export Log to CSV</button>
+          <button id="btn-finalize-survey" class="btn btn-primary">Finalize Survey</button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Nightjar-Talon Sensor Suite &copy; 2026. Made with Google DeepMind Advanced Agentic Coding.</p>
+    </footer>
+  </div>
+</body>
+</html>
