@@ -57,6 +57,7 @@
                 "/Users/turynlimbanda/.platformio/packages/framework-arduino-mbed/libraries/openamp_arduino/src",
                 "/Users/turynlimbanda/.platformio/packages/framework-arduino-mbed/libraries/rpclib/src",
                 "/Users/turynlimbanda/.platformio/packages/framework-arduino-mbed/libraries/syntiant_ilib/src",
+                "/Users/turynlimbanda/.platformio/packages/toolchain-gccarmnoneeabi/arm-none-eabi/include",
                 ""
             ],
             "browse": {
@@ -111,6 +112,7 @@
                     "/Users/turynlimbanda/.platformio/packages/framework-arduino-mbed/libraries/openamp_arduino/src",
                     "/Users/turynlimbanda/.platformio/packages/framework-arduino-mbed/libraries/rpclib/src",
                     "/Users/turynlimbanda/.platformio/packages/framework-arduino-mbed/libraries/syntiant_ilib/src",
+                    "/Users/turynlimbanda/.platformio/packages/toolchain-gccarmnoneeabi/arm-none-eabi/include",
                     ""
                 ]
             },
