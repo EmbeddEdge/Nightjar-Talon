@@ -20,11 +20,14 @@ private:
   
   String _serialInput;
   String _bleInput;
+  bool _streaming;
+  unsigned long _lastStreamMs;
   
   void processCommand(const String &cmdLine, bool fromBle);
   void showHelp();
   void showStatus();
   void showLux();
+  void streamLux();
   
   // Helpers
   void splitCommand(const String &cmdLine, String &cmd, String &arg1, String &arg2);

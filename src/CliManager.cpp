@@ -1,14 +1,17 @@
 #include "CliManager.h"
 #include <stdarg.h>
 
-CliManager::CliManager(SensorManager &sensor, SurveyManager &survey, BleManager &ble)
-    : _sensor(sensor), _survey(survey), _ble(ble), _serialInput(""), _bleInput("") {}
+CliManager::CliManager(SensorManager &sensor, SurveyManager &survey,
+                       BleManager &ble)
+    : _sensor(sensor), _survey(survey), _ble(ble), _serialInput(""),
+      _bleInput(""), _streaming(false), _lastStreamMs(0) {}
 
 void CliManager::begin() {
   // Print initial greeting on boot
   Serial.println("==========================================");
   Serial.println("   Nightjar-Talon Light Sensor Platform   ");
-  Serial.print("   Version: "); Serial.println(FIRMWARE_VERSION);
+  Serial.print("   Version: ");
+  Serial.println(FIRMWARE_VERSION);
   Serial.println("   Type 'help' for commands list          ");
   Serial.println("==========================================");
 }
@@ -42,9 +45,14 @@ void CliManager::update() {
       }
     }
   }
+
+  // Stream lux readings at 1 Hz when active
+  if (_streaming) {
+    streamLux();
+  }
 }
 
-void CliManager::printOutput(const char* format, ...) {
+void CliManager::printOutput(const char *format, ...) {
   char buffer[256];
   va_list args;
   va_start(args, format);
@@ -58,7 +66,8 @@ void CliManager::printOutput(const char* format, ...) {
   _ble.sendNusOutput(buffer);
 }
 
-void CliManager::splitCommand(const String &cmdLine, String &cmd, String &arg1, String &arg2) {
+void CliManager::splitCommand(const String &cmdLine, String &cmd, String &arg1,
+                              String &arg2) {
   cmd = "";
   arg1 = "";
   arg2 = "";
@@ -67,7 +76,8 @@ void CliManager::splitCommand(const String &cmdLine, String &cmd, String &arg1, 
   int len = cmdLine.length();
 
   // Trim leading whitespace
-  while (index < len && cmdLine[index] == ' ') index++;
+  while (index < len && cmdLine[index] == ' ')
+    index++;
 
   // Get command word
   while (index < len && cmdLine[index] != ' ') {
@@ -76,7 +86,8 @@ void CliManager::splitCommand(const String &cmdLine, String &cmd, String &arg1, 
   }
 
   // Trim middle whitespace
-  while (index < len && cmdLine[index] == ' ') index++;
+  while (index < len && cmdLine[index] == ' ')
+    index++;
 
   // Get arg1 word
   while (index < len && cmdLine[index] != ' ') {
@@ -85,7 +96,8 @@ void CliManager::splitCommand(const String &cmdLine, String &cmd, String &arg1, 
   }
 
   // Trim middle whitespace
-  while (index < len && cmdLine[index] == ' ') index++;
+  while (index < len && cmdLine[index] == ' ')
+    index++;
 
   // Get arg2 (rest of line)
   while (index < len) {
@@ -99,13 +111,13 @@ void CliManager::splitCommand(const String &cmdLine, String &cmd, String &arg1, 
 }
 
 void CliManager::processCommand(const String &cmdLine, bool fromBle) {
-  #if DEBUG
+#if DEBUG
   // Echo command back to local USB for logging
   if (fromBle) {
     Serial.print("BLE-CLI: ");
     Serial.println(cmdLine);
   }
-  #endif
+#endif
 
   String cmd, arg1, arg2;
   splitCommand(cmdLine, cmd, arg1, arg2);
@@ -124,25 +136,29 @@ void CliManager::processCommand(const String &cmdLine, bool fromBle) {
         arg2 = "office"; // Default standard
       }
       _survey.startSurvey(arg2.c_str());
-      const RoomStandard* std = _survey.getActiveRoomStandard();
+      const RoomStandard *std = _survey.getActiveRoomStandard();
       if (std) {
-        printOutput("SUCCESS: Survey started for '%s' (Target: %.1f Lux)\n", std->name, std->targetLux);
+        printOutput("SUCCESS: Survey started for '%s' (Target: %.1f Lux)\n",
+                    std->name, std->targetLux);
       } else {
         printOutput("ERROR: Failed to start survey.\n");
       }
     } else if (arg1 == "add") {
       if (!_survey.isActive()) {
-        printOutput("ERROR: No active survey. Start one using 'survey start <room_type>'\n");
+        printOutput("ERROR: No active survey. Start one using 'survey start "
+                    "<room_type>'\n");
         return;
       }
       if (arg2 == "") {
         char defaultLabel[16];
-        snprintf(defaultLabel, sizeof(defaultLabel), "Point_%d", _survey.getPointCount() + 1);
+        snprintf(defaultLabel, sizeof(defaultLabel), "Point_%d",
+                 _survey.getPointCount() + 1);
         arg2 = defaultLabel;
       }
       float currentLux = _sensor.getLux();
       if (_survey.addPoint(arg2.c_str(), currentLux)) {
-        printOutput("RECORDED: Point '%s' = %.1f Lux\n", arg2.c_str(), currentLux);
+        printOutput("RECORDED: Point '%s' = %.1f Lux\n", arg2.c_str(),
+                    currentLux);
       } else {
         printOutput("ERROR: Failed to add point (survey full or inactive).\n");
       }
@@ -153,7 +169,7 @@ void CliManager::processCommand(const String &cmdLine, bool fromBle) {
       }
 
       // Generate a detailed ASCII survey report
-      const RoomStandard* std = _survey.getActiveRoomStandard();
+      const RoomStandard *std = _survey.getActiveRoomStandard();
       int count = _survey.getPointCount();
       float avg = _survey.getAverageLux();
       float minLux = _survey.getMinLux();
@@ -170,35 +186,46 @@ void CliManager::processCommand(const String &cmdLine, bool fromBle) {
       printOutput("Target Lux    : %.1f Lux\n", target);
       printOutput("--------------------------------------------\n");
       printOutput("Recorded measurements (%d):\n", count);
-      
+
       for (int i = 0; i < count; i++) {
         SurveyPoint pt = _survey.getPoint(i);
         bool pointPass = pt.lux >= target;
-        printOutput(" - %-12s: %6.1f Lux  [%s]\n", pt.label, pt.lux, pointPass ? "PASS" : "LOW");
+        printOutput(" - %-12s: %6.1f Lux  [%s]\n", pt.label, pt.lux,
+                    pointPass ? "PASS" : "LOW");
       }
-      
+
       printOutput("--------------------------------------------\n");
       printOutput("Statistical Summary:\n");
-      printOutput(" - Average Lux   : %.1f Lux  [%s]\n", avg, meetsAvg ? "SATISFACTORY" : "DEFICIENT");
+      printOutput(" - Average Lux   : %.1f Lux  [%s]\n", avg,
+                  meetsAvg ? "SATISFACTORY" : "DEFICIENT");
       printOutput(" - Minimum Lux   : %.1f Lux\n", minLux);
       printOutput(" - Maximum Lux   : %.1f Lux\n", maxLux);
-      printOutput(" - Uniformity    : %.2f       [%s]\n", uniformity, meetsUnif ? "COMPLIANT" : "POOR");
+      printOutput(" - Uniformity    : %.2f       [%s]\n", uniformity,
+                  meetsUnif ? "COMPLIANT" : "POOR");
       printOutput("--------------------------------------------\n");
-      printOutput("Compliance Status: %s\n", (meetsAvg && meetsUnif) ? "PASSED" : "FAILED");
+      printOutput("Compliance Status: %s\n",
+                  (meetsAvg && meetsUnif) ? "PASSED" : "FAILED");
       printOutput("--------------------------------------------\n");
       printOutput("Recommendations & Actions:\n");
 
       if (!meetsAvg) {
         float deficit = target - avg;
-        printOutput(" * DEFICIT: Room is under-illuminated by %.1f Lux on average.\n", deficit);
-        printOutput(" * FIREFIGHTING: Increase primary light fixtures to add more lumens.\n");
+        printOutput(
+            " * DEFICIT: Room is under-illuminated by %.1f Lux on average.\n",
+            deficit);
+        printOutput(" * FIREFIGHTING: Increase primary light fixtures to add "
+                    "more lumens.\n");
       } else {
-        printOutput(" * Average ambient light levels meet the room requirements.\n");
+        printOutput(
+            " * Average ambient light levels meet the room requirements.\n");
       }
 
       if (!meetsUnif) {
-        printOutput(" * UNIFORMITY: Light distribution is uneven (%.2f < 0.40).\n", uniformity);
-        printOutput(" * REMEDY: Space lighting sources more evenly or add diffuse fixtures.\n");
+        printOutput(
+            " * UNIFORMITY: Light distribution is uneven (%.2f < 0.40).\n",
+            uniformity);
+        printOutput(" * REMEDY: Space lighting sources more evenly or add "
+                    "diffuse fixtures.\n");
       }
 
       // Check for individual dark spots (less than 70% of target)
@@ -210,13 +237,16 @@ void CliManager::processCommand(const String &cmdLine, bool fromBle) {
             printOutput(" * DARK SPOTS IDENTIFIED:\n");
             darkSpotsFound = true;
           }
-          printOutput("   - Area around '%s' is very dark (%.1f Lux).\n", pt.label, pt.lux);
-          printOutput("     Recommendation: Place a task lamp (table lamp, spot) here.\n");
+          printOutput("   - Area around '%s' is very dark (%.1f Lux).\n",
+                      pt.label, pt.lux);
+          printOutput("     Recommendation: Place a task lamp (table lamp, "
+                      "spot) here.\n");
         }
       }
 
       if (meetsAvg && meetsUnif && !darkSpotsFound) {
-        printOutput(" * Excellent! The lighting layout is optimal and fully compliant.\n");
+        printOutput(" * Excellent! The lighting layout is optimal and fully "
+                    "compliant.\n");
       }
 
       printOutput("============================================\n\n");
@@ -240,32 +270,54 @@ void CliManager::processCommand(const String &cmdLine, bool fromBle) {
         printOutput("ERROR: Factor must be positive.\n");
       }
     }
+  } else if (cmd == "stream") {
+    _streaming = !_streaming;
+    if (_streaming) {
+      _lastStreamMs = 0; // force an immediate first print
+      printOutput(
+          "STREAM: Lux streaming started. Type 'stream' again to stop.\n");
+    } else {
+      printOutput("STREAM: Lux streaming stopped.\n");
+    }
   } else {
-    printOutput("ERROR: Unknown command '%s'. Type 'help' for command list.\n", cmd.c_str());
+    printOutput("ERROR: Unknown command '%s'. Type 'help' for command list.\n",
+                cmd.c_str());
   }
 }
 
 void CliManager::showHelp() {
   printOutput("\n--- Available Commands ---\n");
   printOutput("help                   : Show this command list\n");
-  printOutput("status                 : Print system state and active configurations\n");
-  printOutput("lux                    : Read real-time lux, CCT, and raw colors\n");
-  printOutput("calibrate <factor>     : Read or set calibration scale multiplier\n");
-  printOutput("survey start <room>    : Start a room survey (office, kitchen, living, bedroom, hallway)\n");
-  printOutput("survey add <label>     : Record sensor reading at specific point label\n");
-  printOutput("survey end             : Complete survey and display compliance analysis report\n");
-  printOutput("survey clear           : Discard active survey data\n\n");
+  printOutput("status                 : Print system state and active "
+              "configurations\n");
+  printOutput(
+      "lux                    : Read real-time lux, CCT, and raw colors\n");
+  printOutput(
+      "calibrate <factor>     : Read or set calibration scale multiplier\n");
+  printOutput("survey start <room>    : Start a room survey (office, kitchen, "
+              "living, bedroom, hallway)\n");
+  printOutput("survey add <label>     : Record sensor reading at specific "
+              "point label\n");
+  printOutput("survey end             : Complete survey and display compliance "
+              "analysis report\n");
+  printOutput("survey clear           : Discard active survey data\n");
+  printOutput("stream                 : Toggle continuous 10 Hz lux streaming "
+              "(type again to stop)\n\n");
 }
 
 void CliManager::showStatus() {
   printOutput("\n--- System Status ---\n");
   printOutput("Firmware Version : %s\n", FIRMWARE_VERSION);
-  printOutput("BLE Connection   : %s\n", _ble.isConnected() ? "Connected" : "Advertising / Idle");
-  printOutput("Sensor Auto-Gain : Active (Current: %dx, IT: %.1f ms)\n", _sensor.getGain(), _sensor.getIntegrationTimeMs());
-  printOutput("Sensor Saturation: %s\n", _sensor.isSaturated() ? "YES (Saturated!)" : "No (Normal)");
-  printOutput("Survey Status    : %s\n", _survey.isActive() ? "ACTIVE" : "INACTIVE");
+  printOutput("BLE Connection   : %s\n",
+              _ble.isConnected() ? "Connected" : "Advertising / Idle");
+  printOutput("Sensor Auto-Gain : Active (Current: %dx, IT: %.1f ms)\n",
+              _sensor.getGain(), _sensor.getIntegrationTimeMs());
+  printOutput("Sensor Saturation: %s\n",
+              _sensor.isSaturated() ? "YES (Saturated!)" : "No (Normal)");
+  printOutput("Survey Status    : %s\n",
+              _survey.isActive() ? "ACTIVE" : "INACTIVE");
   if (_survey.isActive()) {
-    const RoomStandard* std = _survey.getActiveRoomStandard();
+    const RoomStandard *std = _survey.getActiveRoomStandard();
     printOutput(" - Active Room   : %s\n", std ? std->name : "Custom");
     printOutput(" - Target Lux    : %.1f Lux\n", std ? std->targetLux : 0.0f);
     printOutput(" - Points Logged : %d\n", _survey.getPointCount());
@@ -278,7 +330,16 @@ void CliManager::showLux() {
   printOutput("\n--- Real-Time Light Readings ---\n");
   printOutput("Calculated Lux   : %.1f Lux\n", _sensor.getLux());
   printOutput("Color Temp (CCT) : %.0f K\n", _sensor.getColorTemp());
-  printOutput("Raw RGBC Data    : R=%d, G=%d, B=%d, C=%d\n", rgbc.r, rgbc.g, rgbc.b, rgbc.c);
+  printOutput("Raw RGBC Data    : R=%d, G=%d, B=%d, C=%d\n", rgbc.r, rgbc.g,
+              rgbc.b, rgbc.c);
   printOutput("Current Gain     : %dx\n", _sensor.getGain());
   printOutput("\n");
+}
+
+void CliManager::streamLux() {
+  unsigned long now = millis();
+  if (now - _lastStreamMs >= 100) {
+    _lastStreamMs = now;
+    printOutput("[%lums] Lux: %.1f\n", now, _sensor.getLux());
+  }
 }

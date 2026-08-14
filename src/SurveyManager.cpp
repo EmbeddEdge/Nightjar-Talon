@@ -1,6 +1,4 @@
 #include "SurveyManager.h"
-#include <string.h>
-#include <stdio.h>
 
 SurveyManager::SurveyManager()
     : _active(false), _roomStandard(nullptr), _pointCount(0) {

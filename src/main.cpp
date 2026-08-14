@@ -34,6 +34,53 @@ void fatalErrorBlink() {
   }
 }
 
+void luxLedControl(float lux) {
+  // update the RGB led based on the level of lux
+  //   100-200 lux: The LEDs should be Red and continuously ON.
+  //   201-350 lux: The LEDs should pulse ON briefly (flicker) every ~2 seconds.
+  //   351-500 lux: The LEDs should be Blue and continuously ON.
+  //   > 500 lux: The LEDs should blink rapidly.
+  if (millis() % 2 == 0) {
+    if (lux > 500) {
+      digitalWrite(LEDB, HIGH);
+      delay(100);
+      digitalWrite(LEDB, LOW);
+      delay(100);
+    } else if (lux > 350) {
+      digitalWrite(LEDB, HIGH);
+      delay(100);
+      digitalWrite(LEDB, LOW);
+      delay(100);
+    } else if (lux > 200) {
+      digitalWrite(LEDR, HIGH);
+      delay(100);
+      digitalWrite(LEDR, LOW);
+      delay(100);
+    } else {
+      digitalWrite(LEDR, LOW);
+    }
+  } else if (millis() % 2 == 1) {
+    if (lux > 500) {
+      digitalWrite(LEDG, HIGH);
+      delay(100);
+      digitalWrite(LEDG, LOW);
+      delay(100);
+    } else if (lux > 350) {
+      digitalWrite(LEDG, HIGH);
+      delay(100);
+      digitalWrite(LEDG, LOW);
+      delay(100);
+    } else if (lux > 200) {
+      digitalWrite(LEDG, HIGH);
+      delay(100);
+      digitalWrite(LEDG, LOW);
+      delay(100);
+    } else {
+      digitalWrite(LEDG, LOW);
+    }
+  }
+}
+
 void setup() {
   // Initialize USB Serial Monitor
   Serial.begin(SERIAL_MONITOR_BAUD);
@@ -65,6 +112,8 @@ void setup() {
 void loop() {
   // Update sensor readings and auto-gain adjustments
   sensor.update();
+
+  luxLedControl(sensor.getLux());
 
   // Generate survey state JSON
   char surveyJson[256];
